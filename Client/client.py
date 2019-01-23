@@ -75,7 +75,7 @@ def view_transaction():
 
 
 @app.route('/identity/new', methods=['GET'])
-def new_wallet():
+def new_identity():
     random_gen = Crypto.Random.new().read
     private_key = RSA.generate(1024, random_gen)
     public_key = private_key.publickey()
@@ -88,26 +88,31 @@ def new_wallet():
 
 
 @app.route('/generate/vote', methods=['POST'])
-def generate_transaction():
+def generate_vote():
     response = {}
+    code = 200
     vote2candidate = None
     for candidate in CANDIDATES.as_list():
-        print(request.form )
-        if request.form.get(candidate):
+        if request.form.get("my_candidate") == candidate:
             vote2candidate = candidate
             break
     if not vote2candidate:
-        return jsonify(response), 110
+        response["error"] = "No such candidate."
+        code = 500
+    else:
+        sender_address = request.form['sender_address']
+        sender_private_key = request.form['sender_private_key']
+        vote = Vote(
+            sender_address, sender_private_key, vote2candidate)
 
-    sender_address = request.form['sender_address']
-    sender_private_key = request.form['sender_private_key']
-    vote = Vote(
-        sender_address, sender_private_key, vote2candidate)
+        response['vote'] = vote.to_dict()
+        try:
+            response['signature'] = vote.sign_transaction()
+        except:
+            response["error"] = "The key pair does not work."
+            code = 500
 
-    response = {'vote': vote.to_dict(
-    ), 'signature': vote.sign_transaction()}
-
-    return jsonify(response), 200
+    return jsonify(response), code
 
 
 if __name__ == '__main__':
