@@ -9,7 +9,7 @@ class Candidates():
     Can be instantiated with a file
     """
 
-    def __init__(self, theList="Client/res/candidates.txt"):
+    def __init__(self, theList="res/candidates.txt"):
         self.candidates = []
         if isinstance(theList, str):
             with open(theList, 'r') as f:
