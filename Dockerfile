@@ -1,5 +1,4 @@
-FROM ubuntu:16.04
+FROM xzpjerry/prjtestt
 RUN apt update
 RUN apt upgrade
-EXPOSE 80 443
-RUN mkdir /host
+EXPOSE 8080 80 443
