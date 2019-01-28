@@ -8,7 +8,6 @@ class Candidates():
     A list of candidates'name
     Can be instantiated with a file
     """
-
     def __init__(self, theList="res/candidates.txt"):
         self.candidates = []
         if isinstance(theList, str):

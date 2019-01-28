@@ -94,4 +94,7 @@ if __name__ == '__main__':
     port = args.port
 
     # Client can only be run in local network
-    app.run(host='127.0.0.1', port=port)
+    # app.run(host='127.0.0.1', port=port)
+
+    # Testing purpose
+    app.run(host='0.0.0.0', port=port)
