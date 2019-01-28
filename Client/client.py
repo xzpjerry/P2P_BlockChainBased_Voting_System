@@ -12,16 +12,17 @@ python_version  : 3.6.5
 Comments        : 
 References      : Will fill out this part when the work is done
 '''
+import sys
+sys.path.append("./Modal")
+sys.path.append("./View")
+sys.path.append("./Controller")
+from vote import Vote
 from candidates import Candidates
-from collections import OrderedDict
+from signer import hex2bin, sign_transaction, gen_id
 
-import binascii
-
-import Crypto
-import Crypto.Random
-from Crypto.Hash import SHA
-from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5
+import os
+tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'View/templates')
+sta_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'View/static')
 
 import requests
 import flask
@@ -29,33 +30,7 @@ from flask import Flask, jsonify, request, render_template
 
 CANDIDATES = Candidates()
 
-
-class Vote:
-
-    def __init__(self, sender_address, sender_private_key, vote):
-        self.sender_address = sender_address
-        self.sender_private_key = sender_private_key
-        self.vote = vote
-
-    def __getattr__(self, attr):
-        return self.data[attr]
-
-    def to_dict(self):
-        return OrderedDict({'sender_address': self.sender_address,
-                            'vote': self.vote})
-
-    def sign_transaction(self):
-        """
-        Sign transaction with private key
-        """
-        private_key = RSA.importKey(
-            binascii.unhexlify(self.sender_private_key))
-        signer = PKCS1_v1_5.new(private_key)
-        h = SHA.new(str(self.to_dict()).encode('utf8'))
-        return binascii.hexlify(signer.sign(h)).decode('ascii')
-
-
-app = Flask(__name__)
+app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
 
 
 @app.route('/')
@@ -76,14 +51,7 @@ def view_transaction():
 
 @app.route('/identity/new', methods=['GET'])
 def new_identity():
-    random_gen = Crypto.Random.new().read
-    private_key = RSA.generate(1024, random_gen)
-    public_key = private_key.publickey()
-    response = {
-        'private_key': binascii.hexlify(private_key.exportKey(format='DER')).decode('ascii'),
-        'public_key': binascii.hexlify(public_key.exportKey(format='DER')).decode('ascii')
-    }
-
+    response = gen_id()
     return jsonify(response), 200
 
 
@@ -102,12 +70,13 @@ def generate_vote():
     else:
         sender_address = request.form['sender_address']
         sender_private_key = request.form['sender_private_key']
-        vote = Vote(
-            sender_address, sender_private_key, vote2candidate)
+        newvote = Vote(
+            sender_address, vote2candidate)
 
-        response['vote'] = vote.to_dict()
+        response['vote'] = newvote.to_dict()
         try:
-            response['signature'] = vote.sign_transaction()
+            response['signature'] = sign_transaction(
+                newvote.to_dict(), sender_private_key)
         except:
             response["error"] = "The key pair does not work."
             code = 500
@@ -124,4 +93,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
 
-    app.run(host='0.0.0.0', port=port)
+    # Client can only be run in local network
+    app.run(host='127.0.0.1', port=port)
