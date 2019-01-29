@@ -45,34 +45,4 @@ class Blockchain:
         self.chain.append(block)
         return block
 
-    # # Submission and verification
-    # def verify_transaction_signature(self, public_address, signature, transaction):
-    #     """
-    #     Check that the provided signature corresponds to transaction
-    #     signed by the public key (sender_address)
-    #     """
-    #     try:
-    #         public_key = RSA.importKey(hex2bin(public_address))
-    #         verifier = PKCS1_v1_5.new(public_key)
-    #         h = SHA.new(str(transaction).encode('utf8'))
-    #         return verifier.verify(h, hex2bin(signature))
-    #     except:
-    #         return False
-
-    # def reward_miners(self, miners_address):
-    #     transaction = Vote(None, None, miners_address, MINING_REWARD)
-    #     self.curr_session.append(transaction.to_dict())
-
-    # def submit_transaction(self, voter_address, voteTo, signature):
-    #     """
-    #     Add a transaction to curr_session array if the signature verified
-    #     """
-    #     transaction = Vote(voter_address, voteTo, None, None).to_dict()
-    #     transaction_verification = self.verify_transaction_signature(
-    #         voter_address, signature, transaction)
-    #     if transaction_verification:
-    #         self.curr_session.append(transaction)
-    #         return len(self.chain) + 1
-    #     return -1
-
 
