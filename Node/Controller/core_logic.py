@@ -6,7 +6,7 @@ from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA
 
 MAX_NONCE = 2 ** 32
-MINING_DIFF = 4
+MINING_DIFF = 4 # nonce start with n zeros
 import random
 
 

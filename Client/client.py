@@ -68,8 +68,8 @@ def generate_vote():
         response["error"] = "No such candidate."
         code = 500
     else:
-        sender_address = request.form['sender_address']
-        sender_private_key = request.form['sender_private_key']
+        sender_address = request.form['voter_address']
+        sender_private_key = request.form['voter_private_key']
         newvote = Vote(
             sender_address, vote2candidate)
 
@@ -80,7 +80,6 @@ def generate_vote():
         except:
             response["error"] = "The key pair does not work."
             code = 500
-
     return jsonify(response), code
 
 

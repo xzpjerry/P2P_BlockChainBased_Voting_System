@@ -1,0 +1,6 @@
+body {
+	padding-top: 54px;
+	}
+
+table.fixed { table-layout:fixed; word-break: break-all; }
+table.fixed td { overflow: hidden; }
