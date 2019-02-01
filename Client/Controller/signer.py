@@ -10,6 +10,18 @@ from Crypto.Signature import PKCS1_v1_5
 def hex2bin(hexStr):
     return binascii.unhexlify(hexStr)
 
+def verfiy_candidate_signature(public_address, signature, name):
+    """
+    Check that the provided signature corresponds to transaction
+    signed by the public key (sender_address)
+    """
+    try:
+        public_key = RSA.importKey(hex2bin(public_address))
+        verifier = PKCS1_v1_5.new(public_key)
+        h = SHA.new(str(name).encode('utf8'))
+        return verifier.verify(h, hex2bin(signature))
+    except:
+        return False
 
 def gen_id():
     random_gen = Crypto.Random.new().read

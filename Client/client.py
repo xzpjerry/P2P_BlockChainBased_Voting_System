@@ -18,7 +18,7 @@ sys.path.append("./View")
 sys.path.append("./Controller")
 from vote import Vote
 from candidates import Candidates
-from signer import hex2bin, sign_transaction, gen_id
+from signer import hex2bin, sign_transaction, gen_id, verfiy_candidate_signature
 
 import os
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'View/templates')
@@ -28,6 +28,7 @@ import requests
 import flask
 from flask import Flask, jsonify, request, render_template
 
+CANDIDATES_PUBLIC_KEY = '30819f300d06092a864886f70d010101050003818d0030818902818100abfac79b3656f20de2cda012482788f78a0b6e891c6b93c946c3b14617a6aa743b49a9fbbd426245b7ef8382f20c2a6f0d29ab92699961076fe38658f4e6a4bbbdededc053aa445f78a0aaf17559ee8fea17e2f19b812201c7b4a7f8029f2df8fb030561f25d8b7e9c829530633ea1cb68aed505574c34e74b2b6e20b88d20990203010001'
 CANDIDATES = Candidates()
 
 app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
@@ -52,6 +53,13 @@ def view_transaction():
 @app.route('/identity/new', methods=['GET'])
 def new_identity():
     response = gen_id()
+
+    # priK = response['private_key']
+    # pubK = response['public_key']
+
+    # for candidate in CANDIDATES.as_list():
+    #     print(sign_transaction(candidate, priK))
+
     return jsonify(response), 200
 
 
@@ -59,13 +67,17 @@ def new_identity():
 def generate_vote():
     response = {}
     code = 200
-    vote2candidate = None
-    for candidate in CANDIDATES.as_list():
-        if request.form.get("my_candidate") == candidate:
-            vote2candidate = candidate
+    vote2candidate = False
+    for candidate, sign in CANDIDATES.as_list_with_signature():
+        if candidate != request.form['my_candidate']:
+            continue
+        if not verfiy_candidate_signature(CANDIDATES_PUBLIC_KEY, sign, candidate):
+            vote2candidate = False
             break
+        else:
+            vote2candidate = candidate
     if not vote2candidate:
-        response["error"] = "No such candidate."
+        response["error"] = "No such candidate or your candidate list is corrupted."
         code = 500
     else:
         sender_address = request.form['voter_address']

@@ -178,9 +178,7 @@
             <div class="alert alert-success" role="alert">
               <h4 class="alert-heading">Something is wrong</h4>
               <p>An error occurred during the process. Your vote will not be added to the next block. Error details are attached below:</p>
-              <div class="col-sm-12">
-                <input type="text" name="error_detail" id="error_detail" rows="2" readonly>
-              </div>
+              <p name="error_detail" id="error_detail"></p>
             </div>
           </div>
 
@@ -243,7 +241,7 @@
                 
               },
               error: function(error){
-                document.getElementById("error_detail").value = error.responseJSON["error"]
+                document.getElementById("error_detail").innerHTML = error.responseJSON["error"]
                 $("#failed_vote_modal").modal('show')
               }
             });
