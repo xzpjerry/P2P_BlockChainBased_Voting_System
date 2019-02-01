@@ -107,7 +107,7 @@
 
 
     <!-- Modal -->
-    <div class="modal modal-alert fade" id="basicModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+    <div class="modal modal-alert fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
       <div class="modal-dialog">
 
         <div class="modal-content">
@@ -175,7 +175,7 @@
           </div>
 
           <div class="modal-body">
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-danger" role="alert">
               <h4 class="alert-heading">Something is wrong</h4>
               <p>An error occurred during the process. Your vote will not be added to the next block. Error details are attached below:</p>
               <p name="error_detail" id="error_detail"></p>
@@ -201,8 +201,8 @@
 
           <div class="modal-body">
             <div class="alert alert-success" role="alert">
-              <h4 class="alert-heading">Successful Transaction!</h4>
-              <p>You successfully completed your transaction. It will be added to the next block.</p>
+              <h4 class="alert-heading">Successful!</h4>
+              <p>You successfully completed your vote. It will be added to the next block.</p>
             </div>
           </div>
 
@@ -237,7 +237,7 @@
                 document.getElementById("vote2_con").value = response["vote"]["voteTo"];
                 document.getElementById("signature_con").value = response["signature"];
 
-                $("#basicModal").modal('show');
+                $("#confirmModal").modal('show');
                 
               },
               error: function(error){
@@ -271,12 +271,13 @@
                 $("#voter_address").val("");
                 $("#voter_private_key").val("");
 
-                $("#basicModal").modal('hide');
+                $("#confirmModal").modal('hide');
                 $("#success_transaction_modal").modal('show');
                 
               },
               error: function(error){
-                console.log(error);
+                document.getElementById("error_detail").innerHTML = error.responseJSON["error"]
+                $("#failed_vote_modal").modal('show')
               }
             });
 

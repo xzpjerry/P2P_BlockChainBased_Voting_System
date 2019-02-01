@@ -24,20 +24,32 @@ tmpl_dir = os.path.join(os.path.dirname(
 sta_dir = os.path.join(os.path.dirname(
     os.path.abspath(__file__)), 'View/static')
 
+# Instantiate the Blockchain
+blockchain = Blockchain()
+
+import threading
+def return_fresh_thread():
+    return threading.Thread(target=mine, args=(blockchain,))
+MINER_WORKER = False
+
 # Instantiate the Node
 app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
 CORS(app)
 
-# Instantiate the Blockchain
-blockchain = Blockchain()
-
-
 @app.route('/')
 def index():
+    global MINER_WORKER
     table_items_outstanding = []
     for vote_dict in blockchain.curr_session:
         table_items_outstanding.append(vote_dict)
-    return render_template('./index.html', table_items = table_items_outstanding)
+
+    table_items_mined = []
+    for block in blockchain.chain:
+        for vote_dict in block['history']:
+            table_items_mined.append(vote_dict)
+
+    isMining = MINER_WORKER and MINER_WORKER.isAlive()
+    return render_template('./index.html', table_items_outstanding = table_items_outstanding, table_items_mined = table_items_mined, isMining = isMining)
 
 
 @app.route('/configure')
@@ -55,19 +67,29 @@ def get_transactions():
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
     values = request.form
-    print(values)
+    response = {}
     # Check that the required fields are in the POST'ed data
     required = ['voter_address_con', 'vote2_con', 'signature_con']
     if not all(k in values for k in required):
-        return 'Missing values', 400
+        response['error'] = 'Missing values'
+        return jsonify(response), 400
     # Create a new Transaction
     rslt = submit_transaction(blockchain, values['voter_address_con'], values['vote2_con'], values['signature_con'])
 
     if rslt == -1:
-        response = {'message': 'Invalid Vote!'}
-        return jsonify(response), 406
+        response['error'] = 'Invalid Vote!'
+        return jsonify(response), 400
     response = {'message': 'Transaction will be added to Block soon.'}
-    return jsonify(response), 201
+    return jsonify(response), 200
+
+@app.route('/mine', methods=['GET'])
+def start_mining():
+    global MINER_WORKER
+    if MINER_WORKER and MINER_WORKER.isAlive():
+        return "Nonsense!", 400
+    MINER_WORKER = return_fresh_thread()
+    MINER_WORKER.start()
+    return "Will do", 200
 
 
 if __name__ == '__main__':
