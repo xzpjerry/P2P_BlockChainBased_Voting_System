@@ -8,7 +8,7 @@ sys.path.append("Node/Controller")
 
 from blockChain import Blockchain
 from vote import Vote
-from core_logic import submit_transaction, mine
+from core_logic import submit_transaction, mine, gen_id
 
 
 import requests
@@ -36,6 +36,8 @@ MINER_WORKER = False
 app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
 CORS(app)
 
+MINERS_PUBLIC_ADDRESS = None
+
 @app.route('/')
 def index():
     global MINER_WORKER
@@ -55,6 +57,22 @@ def index():
 @app.route('/configure')
 def configure():
     return render_template('./configure.html')
+
+@app.route('/new_id')
+def new_id():
+    return render_template('./new_id.html')
+
+@app.route('/identity/new', methods=['GET'])
+def new_identity():
+    response = gen_id()
+
+    # priK = response['private_key']
+    # pubK = response['public_key']
+
+    # for candidate in CANDIDATES.as_list():
+    #     print(sign_transaction(candidate, priK))
+
+    return jsonify(response), 200
 
 @app.route('/transactions/get', methods=['GET'])
 def get_transactions():
@@ -91,6 +109,20 @@ def start_mining():
     MINER_WORKER.start()
     return "Will do", 200
 
+@app.route('/nodes/log_in', methods=['POST'])
+def register_nodes():
+    values = request.form
+    address = values.get('miners_address')
+
+    if not address:
+        return "Error: Please supply a valid address", 400
+
+    MINERS_PUBLIC_ADDRESS = address
+    print(MINERS_PUBLIC_ADDRESS)
+    response = {
+        'message': 'Your address is set',
+    }
+    return jsonify(response), 201
 
 if __name__ == '__main__':
     from argparse import ArgumentParser

@@ -1,6 +1,8 @@
 from vote import Vote
 from helper import bin2hex, hex2bin, hash_block, hash_str
 
+import Crypto
+import Crypto.Random
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA
@@ -10,6 +12,15 @@ MAX_NONCE = 2 ** 32
 MINING_DIFF = 4 # nonce start with n zeros
 import random
 
+def gen_id():
+    random_gen = Crypto.Random.new().read
+    private_key = RSA.generate(1024, random_gen)
+    public_key = private_key.publickey()
+    response = {
+        'private_key': private_key.exportKey(format='DER').hex(),
+        'public_key': public_key.exportKey(format='DER').hex()
+    }
+    return response
 
 def verify_transaction_signature(public_address, signature, transaction_dict):
     """
