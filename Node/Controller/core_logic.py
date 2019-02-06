@@ -1,5 +1,5 @@
 from vote import Vote
-from helper import bin2hex, hex2bin, hash_block, hash_str
+from helper import bin2hex, hex2bin, hash_block, hash_str, dump2file
 
 import Crypto
 import Crypto.Random
@@ -16,9 +16,13 @@ def gen_id():
     random_gen = Crypto.Random.new().read
     private_key = RSA.generate(1024, random_gen)
     public_key = private_key.publickey()
+    pri_k_exp = private_key.exportKey(format='DER').hex()
+    pub_k_exp = public_key.exportKey(format='DER').hex()
+    dump2file(pri_k_exp, "pri.der")
+    dump2file(pub_k_exp, "pub.der")
     response = {
-        'private_key': private_key.exportKey(format='DER').hex(),
-        'public_key': public_key.exportKey(format='DER').hex()
+        'private_key': pri_k_exp,
+        'public_key': pub_k_exp
     }
     return response
 
@@ -27,13 +31,13 @@ def verify_transaction_signature(public_address, signature, transaction_dict):
     Check that the provided signature corresponds to transaction
     signed by the public key (sender_address)
     """
-    try:
-        public_key = RSA.importKey(hex2bin(public_address))
-        verifier = PKCS1_v1_5.new(public_key)
-        h = SHA.new(str(transaction_dict).encode('utf8'))
-        return verifier.verify(h, hex2bin(signature))
-    except:
-        return False
+    # try:
+    public_key = RSA.importKey(hex2bin(public_address))
+    verifier = PKCS1_v1_5.new(public_key)
+    h = SHA.new(str(transaction_dict).encode('utf8'))
+    return verifier.verify(h, hex2bin(signature))
+    # except:
+    #     return False
 
 
 def submit_transaction(ToBC, voter_address, voteTo, signature, miner_address = None, token = None):
@@ -41,8 +45,13 @@ def submit_transaction(ToBC, voter_address, voteTo, signature, miner_address = N
     Add a transaction to curr_session array if the signature verified
     """
     transaction_dict = Vote(voter_address, voteTo, miner_address, token).to_dict()
-    transaction_verification = verify_transaction_signature(
-        voter_address, signature, transaction_dict)
+    transaction_verification = False
+    if voter_address:
+        transaction_verification = verify_transaction_signature(
+            voter_address, signature, transaction_dict)
+    elif miner_address:
+        transaction_verification = verify_transaction_signature(
+            miner_address, signature, transaction_dict)
     if transaction_verification:
         ToBC.curr_session.append(transaction_dict)
         return len(ToBC.chain) + 1
@@ -55,8 +64,17 @@ def POW_valid(last_block, latest_session, nonce, difficulty_bits, target):
     hash_rslt = hash_str(header + str(nonce))
     return hash_rslt[0:difficulty_bits:1] == target
 
+def sign_transaction(trans_dict, with_k):
+    """
+    Sign transaction with private key
+    """
+    key = RSA.importKey(hex2bin(with_k))
+    cipher = PKCS1_v1_5.new(key)
+    h = SHA.new(str(trans_dict).encode('utf8'))
+    return cipher.sign(h).hex()
 
-def mine(inBC, with_difficulty_bits=MINING_DIFF):
+def mine(inBC,  miner_pub_address, miner_pri_address, with_difficulty_bits=MINING_DIFF):
+    global MINING_REWARD
     random.seed()
     nonce = 0
     last_block = None
@@ -67,5 +85,7 @@ def mine(inBC, with_difficulty_bits=MINING_DIFF):
         if POW_valid(last_block, inBC.curr_session, nonce, with_difficulty_bits, target):
             break
     # need to add fileds to let miner input his identity
-    # submit_transaction(inBC, None, None, )
+    miners_reward = Vote(None, None, miner_pub_address, MINING_REWARD).to_dict()
+    print(submit_transaction(inBC, None, None, sign_transaction(miners_reward, miner_pri_address), miner_pub_address, MINING_REWARD))
     inBC.create_block(nonce, hash_block(last_block))
+    print(inBC)

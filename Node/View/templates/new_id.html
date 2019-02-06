@@ -52,7 +52,7 @@
 
           <div class="card-body">
             <h4 class="card-title">Identity Generator</h4>
-            <p class="card-text">Click on the button below to generate your unique identity</p>
+            <p class="card-text">Click on the button below to set your unique identity</p>
             <input type="button" class="btn btn-primary btn-lg" value="Generate Identity">
           </div>
 
@@ -87,7 +87,7 @@
             <div class="alert alert-danger" role="alert">
               IMPORTANT
               <ul>
-                <li>Save you private and public keys. These keys cannot be recovered!</li>
+                <li>This node's key-pair has been updated.</li>
                 <li>Don't share your private key with anyone!</li>
               </ul> 
             </div>
@@ -109,19 +109,20 @@
 
       $(function(){
         $('input').click(function(){
-
-          $.ajax({
-            url: '/identity/new',
-            type: 'GET',
-            success: function(response){
-              document.getElementById("private_key").innerHTML = response['private_key'];
-              document.getElementById("public_key").innerHTML = response['public_key'];
-              document.getElementById("warning").style.display = "block";
-            },
-            error: function(error){
-              console.log(error);
-            }
-          });
+          if(confirm("Update your key-pair? This action cannot be recovered.")){
+            $.ajax({
+              url: '/identity/new',
+              type: 'GET',
+              success: function(response){
+                document.getElementById("private_key").innerHTML = response['private_key'];
+                document.getElementById("public_key").innerHTML = response['public_key'];
+                document.getElementById("warning").style.display = "block";
+              },
+              error: function(error){
+                console.log(error);
+              }
+            });
+          }
         });
       })
 

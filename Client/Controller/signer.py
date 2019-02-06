@@ -1,4 +1,5 @@
 import binascii
+from helper import dump2file
 
 import Crypto
 import Crypto.Random
@@ -27,9 +28,13 @@ def gen_id():
     random_gen = Crypto.Random.new().read
     private_key = RSA.generate(1024, random_gen)
     public_key = private_key.publickey()
+    pri_k_exp = private_key.exportKey(format='DER').hex()
+    pub_k_exp = public_key.exportKey(format='DER').hex()
+    dump2file(pri_k_exp, "Client_pri.der")
+    dump2file(pub_k_exp, "Client_pub.der")
     response = {
-        'private_key': private_key.exportKey(format='DER').hex(),
-        'public_key': public_key.exportKey(format='DER').hex()
+        'private_key': pri_k_exp,
+        'public_key': pub_k_exp
     }
     return response
 

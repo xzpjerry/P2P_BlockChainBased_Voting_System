@@ -155,26 +155,27 @@
     <script>
       $(function(){
         $("#mine_button").click(function () {
+          if (confirm("You are about to mine the next block?")) {
+            $.ajax({
+              url: "/mine",
+              type: "GET",
+              success: function(response){
 
-          $.ajax({
-            url: "/mine",
-            type: "GET",
-            success: function(response){
-
-              window.location.reload();
-              
-            },
-            error: function(error){
-              console.log(error);
-            }
-          });
-
-        });
+                window.location.reload(true);
+                
+              },
+              error: function(error){
+                console.log(error);
+              }
+            });
+          }
+        }
+      );
 
 
         $("#refresh_transactions").click(function () {
 
-          window.location.reload();
+          window.location.reload(true);
 
         });
 
@@ -186,7 +187,7 @@
             type: "GET",
             success: function(response){
 
-              window.location.reload();
+              window.location.reload(true);
               
             },
             error: function(error){

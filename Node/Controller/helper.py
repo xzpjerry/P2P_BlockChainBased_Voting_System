@@ -18,3 +18,22 @@ def hash_block(block_dict):
 
 def hash_str(astr):
     return sha256(astr.encode('utf-8')).hexdigest()
+
+
+import pickle
+
+
+def dump2file(obj, file='BC.dat'):
+    with(open(file, 'wb')) as f:
+        pickle.dump(obj, f)
+
+
+def restor_from_file(file='BC.dat'):
+    rslt = None
+    try:
+        with(open(file, 'rb')) as f:
+            rslt = pickle.load(f)
+    except:
+        print("No such file")
+        pass
+    return rslt

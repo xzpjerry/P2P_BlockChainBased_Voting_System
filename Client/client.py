@@ -19,6 +19,7 @@ sys.path.append("./Controller")
 from vote import Vote
 from candidates import Candidates
 from signer import hex2bin, sign_transaction, gen_id, verfiy_candidate_signature
+from helper import restor_from_file
 
 import os
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'View/templates')
@@ -28,8 +29,16 @@ import requests
 import flask
 from flask import Flask, jsonify, request, render_template
 
-CANDIDATES_PUBLIC_KEY = '30819f300d06092a864886f70d010101050003818d0030818902818100abfac79b3656f20de2cda012482788f78a0b6e891c6b93c946c3b14617a6aa743b49a9fbbd426245b7ef8382f20c2a6f0d29ab92699961076fe38658f4e6a4bbbdededc053aa445f78a0aaf17559ee8fea17e2f19b812201c7b4a7f8029f2df8fb030561f25d8b7e9c829530633ea1cb68aed505574c34e74b2b6e20b88d20990203010001'
-CANDIDATES = Candidates()
+def get_candidate_public_key_from_some_secure_channel():
+    # This can be done by downloading from https servers
+    return '30819f300d06092a864886f70d010101050003818d0030818902818100abfac79b3656f20de2cda012482788f78a0b6e891c6b93c946c3b14617a6aa743b49a9fbbd426245b7ef8382f20c2a6f0d29ab92699961076fe38658f4e6a4bbbdededc053aa445f78a0aaf17559ee8fea17e2f19b812201c7b4a7f8029f2df8fb030561f25d8b7e9c829530633ea1cb68aed505574c34e74b2b6e20b88d20990203010001'
+
+def get_candidate_list_from_some_secure_channel():
+    # This can be done by downloading from https servers
+    return Candidates()
+
+CANDIDATES_PUBLIC_KEY = get_candidate_public_key_from_some_secure_channel()
+CANDIDATES = get_candidate_list_from_some_secure_channel()
 
 app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
 
@@ -49,17 +58,9 @@ def make_transaction():
 def view_transaction():
     return render_template('./view_transactions.html')
 
-
 @app.route('/identity/new', methods=['GET'])
 def new_identity():
     response = gen_id()
-
-    # priK = response['private_key']
-    # pubK = response['public_key']
-
-    # for candidate in CANDIDATES.as_list():
-    #     print(sign_transaction(candidate, priK))
-
     return jsonify(response), 200
 
 
@@ -68,6 +69,8 @@ def generate_vote():
     response = {}
     code = 200
     vote2candidate = False
+    sender_address = restor_from_file("Client_pub.der")
+    sender_private_key = restor_from_file("Client_pri.der")
     for candidate, sign in CANDIDATES.as_list_with_signature():
         if candidate != request.form['my_candidate']:
             continue
@@ -79,9 +82,10 @@ def generate_vote():
     if not vote2candidate:
         response["error"] = "No such candidate or your candidate list is corrupted."
         code = 500
+    elif not sender_address or not sender_private_key:
+        response["error"] = "Please set your key-pair first"
+        code = 500
     else:
-        sender_address = request.form['voter_address']
-        sender_private_key = request.form['voter_private_key']
         newvote = Vote(
             sender_address, vote2candidate)
 

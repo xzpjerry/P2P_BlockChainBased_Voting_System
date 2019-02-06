@@ -9,7 +9,7 @@ sys.path.append("Node/Controller")
 from blockChain import Blockchain
 from vote import Vote
 from core_logic import submit_transaction, mine, gen_id
-
+from helper import restor_from_file
 
 import requests
 from flask import Flask, jsonify, request, render_template
@@ -25,18 +25,23 @@ sta_dir = os.path.join(os.path.dirname(
     os.path.abspath(__file__)), 'View/static')
 
 # Instantiate the Blockchain
-blockchain = Blockchain()
+blockchain = restor_from_file()
+if not blockchain:
+    blockchain = Blockchain()
+
+MINERS_PUBLIC_ADDRESS = restor_from_file('pub.der')
+MINERS_PRIVATE_ADDRESS = restor_from_file('pri.der')
 
 import threading
-def return_fresh_thread():
-    return threading.Thread(target=mine, args=(blockchain,))
-MINER_WORKER = False
+MINER_WORKER = None
+
+def return_fresh_thread(arguments):
+    return threading.Thread(target=mine, args=arguments)
 
 # Instantiate the Node
 app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
 CORS(app)
 
-MINERS_PUBLIC_ADDRESS = None
 
 @app.route('/')
 def index():
@@ -51,16 +56,18 @@ def index():
             table_items_mined.append(vote_dict)
 
     isMining = MINER_WORKER and MINER_WORKER.isAlive()
-    return render_template('./index.html', table_items_outstanding = table_items_outstanding, table_items_mined = table_items_mined, isMining = isMining)
+    return render_template('./index.html', table_items_outstanding=table_items_outstanding, table_items_mined=table_items_mined, isMining=isMining)
 
 
 @app.route('/configure')
 def configure():
     return render_template('./configure.html')
 
+
 @app.route('/new_id')
 def new_id():
     return render_template('./new_id.html')
+
 
 @app.route('/identity/new', methods=['GET'])
 def new_identity():
@@ -74,13 +81,15 @@ def new_identity():
 
     return jsonify(response), 200
 
+
 @app.route('/transactions/get', methods=['GET'])
 def get_transactions():
-    #Get transactions from transactions pool
+    # Get transactions from transactions pool
     outstanding_rslt = blockchain.curr_session
 
     response = {'transactions': outstanding_rslt}
     return jsonify(response), 200
+
 
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
@@ -92,7 +101,8 @@ def new_transaction():
         response['error'] = 'Missing values'
         return jsonify(response), 400
     # Create a new Transaction
-    rslt = submit_transaction(blockchain, values['voter_address_con'], values['vote2_con'], values['signature_con'])
+    rslt = submit_transaction(
+        blockchain, values['voter_address_con'], values['vote2_con'], values['signature_con'])
 
     if rslt == -1:
         response['error'] = 'Invalid Vote!'
@@ -100,39 +110,57 @@ def new_transaction():
     response = {'message': 'Transaction will be added to Block soon.'}
     return jsonify(response), 200
 
+
 @app.route('/mine', methods=['GET'])
 def start_mining():
     global MINER_WORKER
+    global MINERS_PRIVATE_ADDRESS
+    global MINERS_PUBLIC_ADDRESS
+    if not MINERS_PUBLIC_ADDRESS or not MINERS_PRIVATE_ADDRESS:
+        return "Please set your key-pair first", 400
     if MINER_WORKER and MINER_WORKER.isAlive():
-        return "Nonsense!", 400
-    MINER_WORKER = return_fresh_thread()
+        return "This node is already mining.", 400
+    MINER_WORKER = return_fresh_thread(
+        (blockchain, MINERS_PUBLIC_ADDRESS, MINERS_PRIVATE_ADDRESS))
     MINER_WORKER.start()
     return "Will do", 200
 
+
 @app.route('/nodes/log_in', methods=['POST'])
 def register_nodes():
+    global MINERS_PUBLIC_ADDRESS
+    global MINERS_PRIVATE_ADDRESS
     values = request.form
-    address = values.get('miners_address')
+    pub_address = values.get('miners_pub_address')
+    pri_address = values.get('miners_pri_address')
 
-    if not address:
-        return "Error: Please supply a valid address", 400
+    if not pub_address or not pri_address:
+        return "Error: Please enter (a) valid address(es)", 400
 
-    MINERS_PUBLIC_ADDRESS = address
-    print(MINERS_PUBLIC_ADDRESS)
+    MINERS_PUBLIC_ADDRESS = pub_address
+    MINERS_PRIVATE_ADDRESS = pri_address
     response = {
         'message': 'Your address is set',
     }
-    return jsonify(response), 201
+    return jsonify(response), 200
+
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
+    import atexit
+    from helper import dump2file
+    atexit.register(dump2file, blockchain)
 
     parser = ArgumentParser()
-    parser.add_argument('-p', '--port', default=5000, type=int, help='port to listen on')
+    parser.add_argument('-p', '--port', default=5000,
+                        type=int, help='port to listen on')
     args = parser.parse_args()
     port = args.port
 
-    app.run(host='0.0.0.0', port=port)
+    try:
+        app.run(host='0.0.0.0', port=port)
+    except KeyboardInterrupt:
+        dump2file(blockchain)
 
 # if __name__ == "__main__":
 #     test = Blockchain()
