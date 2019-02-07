@@ -45,13 +45,13 @@ app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
 
 @app.route('/')
 def index():
+    flask.g.candidates = CANDIDATES.as_list()
     return render_template('./index.html')
 
 
-@app.route('/make/vote')
+@app.route('/import_id')
 def make_transaction():
-    flask.g.candidates = CANDIDATES.as_list()
-    return render_template('./make_vote.html')
+    return render_template('./import_id.html')
 
 
 @app.route('/view/transactions')

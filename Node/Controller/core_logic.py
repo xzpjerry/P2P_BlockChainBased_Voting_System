@@ -31,13 +31,13 @@ def verify_transaction_signature(public_address, signature, transaction_dict):
     Check that the provided signature corresponds to transaction
     signed by the public key (sender_address)
     """
-    # try:
-    public_key = RSA.importKey(hex2bin(public_address))
-    verifier = PKCS1_v1_5.new(public_key)
-    h = SHA.new(str(transaction_dict).encode('utf8'))
-    return verifier.verify(h, hex2bin(signature))
-    # except:
-    #     return False
+    try:
+        public_key = RSA.importKey(hex2bin(public_address))
+        verifier = PKCS1_v1_5.new(public_key)
+        h = SHA.new(str(transaction_dict).encode('utf8'))
+        return verifier.verify(h, hex2bin(signature))
+    except:
+        return False
 
 
 def submit_transaction(ToBC, voter_address, voteTo, signature, miner_address = None, token = None):

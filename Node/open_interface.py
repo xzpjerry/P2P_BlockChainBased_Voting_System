@@ -35,8 +35,15 @@ MINERS_PRIVATE_ADDRESS = restor_from_file('pri.der')
 import threading
 MINER_WORKER = None
 
+
 def return_fresh_thread(arguments):
     return threading.Thread(target=mine, args=arguments)
+
+
+def chain2list(blockchain, to_a_list):
+    for block in blockchain.chain:
+        for vote_dict in block['history']:
+            to_a_list.append(vote_dict)
 
 # Instantiate the Node
 app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
@@ -46,14 +53,13 @@ CORS(app)
 @app.route('/')
 def index():
     global MINER_WORKER
+    global blockchain
     table_items_outstanding = []
     for vote_dict in blockchain.curr_session:
         table_items_outstanding.append(vote_dict)
 
     table_items_mined = []
-    for block in blockchain.chain:
-        for vote_dict in block['history']:
-            table_items_mined.append(vote_dict)
+    chain2list(blockchain, table_items_mined)
 
     isMining = MINER_WORKER and MINER_WORKER.isAlive()
     return render_template('./index.html', table_items_outstanding=table_items_outstanding, table_items_mined=table_items_mined, isMining=isMining)
@@ -64,21 +70,27 @@ def configure():
     return render_template('./configure.html')
 
 
-@app.route('/new_id')
+@app.route('/import_id')
 def new_id():
-    return render_template('./new_id.html')
+    return render_template('./import_id.html')
+
+
+@app.route('/chain', methods=['GET'])
+def get_chain_records():
+    response = {}
+    records = []
+    get_chain_records(records)
+    response["chain"] = records
+    return jsonify(response), 200
 
 
 @app.route('/identity/new', methods=['GET'])
 def new_identity():
     response = gen_id()
-
-    # priK = response['private_key']
-    # pubK = response['public_key']
-
-    # for candidate in CANDIDATES.as_list():
-    #     print(sign_transaction(candidate, priK))
-
+    global MINERS_PRIVATE_ADDRESS
+    global MINERS_PUBLIC_ADDRESS
+    MINERS_PRIVATE_ADDRESS = response.get("private_key")
+    MINERS_PUBLIC_ADDRESS = response.get("public_key")
     return jsonify(response), 200
 
 
@@ -116,34 +128,19 @@ def start_mining():
     global MINER_WORKER
     global MINERS_PRIVATE_ADDRESS
     global MINERS_PUBLIC_ADDRESS
+    response = {}
+    code = 200
     if not MINERS_PUBLIC_ADDRESS or not MINERS_PRIVATE_ADDRESS:
-        return "Please set your key-pair first", 400
-    if MINER_WORKER and MINER_WORKER.isAlive():
-        return "This node is already mining.", 400
-    MINER_WORKER = return_fresh_thread(
-        (blockchain, MINERS_PUBLIC_ADDRESS, MINERS_PRIVATE_ADDRESS))
-    MINER_WORKER.start()
-    return "Will do", 200
-
-
-@app.route('/nodes/log_in', methods=['POST'])
-def register_nodes():
-    global MINERS_PUBLIC_ADDRESS
-    global MINERS_PRIVATE_ADDRESS
-    values = request.form
-    pub_address = values.get('miners_pub_address')
-    pri_address = values.get('miners_pri_address')
-
-    if not pub_address or not pri_address:
-        return "Error: Please enter (a) valid address(es)", 400
-
-    MINERS_PUBLIC_ADDRESS = pub_address
-    MINERS_PRIVATE_ADDRESS = pri_address
-    response = {
-        'message': 'Your address is set',
-    }
-    return jsonify(response), 200
-
+        response['error'] = "Please set your key-pair first"
+        code = 400
+    elif MINER_WORKER and MINER_WORKER.isAlive():
+        response['error'] = "This node is already mining."
+        code = 400
+    else:
+        MINER_WORKER = return_fresh_thread(
+            (blockchain, MINERS_PUBLIC_ADDRESS, MINERS_PRIVATE_ADDRESS))
+        MINER_WORKER.start()
+    return jsonify(response), code
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
