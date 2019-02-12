@@ -46,17 +46,17 @@ app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
 @app.route('/')
 def index():
     flask.g.candidates = CANDIDATES.as_list()
-    return render_template('./index.html')
+    return render_template('./index.html', index_is = "isVoting")
 
 
 @app.route('/import_id')
 def make_transaction():
-    return render_template('./import_id.html')
+    return render_template('./import_id.html', index_is = "isImporting")
 
 
 @app.route('/view/transactions')
 def view_transaction():
-    return render_template('./view_transactions.html')
+    return render_template('./view_transactions.html', index_is = "isViewing")
 
 @app.route('/identity/new', methods=['GET'])
 def new_identity():
