@@ -62,17 +62,17 @@ def index():
     chain2list(blockchain, table_items_mined)
 
     isMining = MINER_WORKER and MINER_WORKER.isAlive()
-    return render_template('./index.html', table_items_outstanding=table_items_outstanding, table_items_mined=table_items_mined, isMining=isMining)
+    return render_template('./index.html', index_is = "isMining", table_items_outstanding=table_items_outstanding, table_items_mined=table_items_mined, isMining=isMining)
 
 
 @app.route('/configure')
 def configure():
-    return render_template('./configure.html')
+    return render_template('./configure.html', index_is = "isConfiguring")
 
 
 @app.route('/import_id')
 def new_id():
-    return render_template('./import_id.html')
+    return render_template('./import_id.html', index_is = "isImporting")
 
 
 @app.route('/chain', methods=['GET'])
