@@ -39,24 +39,8 @@ def verify_transaction_signature(public_address, signature, transaction_dict):
     except:
         return False
 
-
-def submit_transaction(ToBC, voter_address, voteTo, signature, miner_address = None, token = None):
-    """
-    Add a transaction to curr_session array if the signature verified
-    """
-    transaction_dict = Vote(voter_address, voteTo, miner_address, token).to_dict()
-    transaction_verification = False
-    if voter_address:
-        transaction_verification = verify_transaction_signature(
-            voter_address, signature, transaction_dict)
-    elif miner_address:
-        transaction_verification = verify_transaction_signature(
-            miner_address, signature, transaction_dict)
-    if transaction_verification:
-        ToBC.curr_session.append(transaction_dict)
-        return len(ToBC.chain) + 1
-    return -1
-
+def verify_and_append_transaction(forBC, withTranscation):
+    pass
 
 def POW_valid(last_block, latest_session, nonce, difficulty_bits, target):
     last_hash = hash_block(last_block)
@@ -84,8 +68,6 @@ def mine(inBC,  miner_pub_address, miner_pri_address, with_difficulty_bits=MININ
         target = '0' * with_difficulty_bits
         if POW_valid(last_block, inBC.curr_session, nonce, with_difficulty_bits, target):
             break
-    # need to add fileds to let miner input his identity
     miners_reward = Vote(None, None, miner_pub_address, MINING_REWARD).to_dict()
-    print(submit_transaction(inBC, None, None, sign_transaction(miners_reward, miner_pri_address), miner_pub_address, MINING_REWARD))
+    inBC.submit_transaction(None, None, sign_transaction(miners_reward, miner_pri_address), miner_pub_address, MINING_REWARD)
     inBC.create_block(nonce, hash_block(last_block))
-    print(inBC)
