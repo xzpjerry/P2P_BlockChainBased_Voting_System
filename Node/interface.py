@@ -8,7 +8,7 @@ sys.path.append("Node/Controller")
 
 from blockChain import Blockchain
 from vote import Vote
-from core_logic import mine, gen_id
+from core_logic import gen_id
 from helper import restor_from_file
 
 import requests
@@ -28,6 +28,7 @@ sta_dir = os.path.join(os.path.dirname(
 blockchain = restor_from_file()
 if not blockchain:
     blockchain = Blockchain()
+print("Is valid", blockchain.is_valid())
 
 MINERS_PUBLIC_ADDRESS = restor_from_file('pub.der')
 MINERS_PRIVATE_ADDRESS = restor_from_file('pri.der')
@@ -46,7 +47,8 @@ def from_locoal_host(request):
 
 
 def return_fresh_thread(arguments):
-    return threading.Thread(target=mine, args=arguments)
+    global blockchain
+    return threading.Thread(target=blockchain.mine, args=arguments)
 
 
 def chain2list(blockchain, to_a_list):
@@ -81,6 +83,7 @@ def index():
 def start_mining():
     if not from_locoal_host(request):
         return "How do you get here?", 404
+    global blockchain
     global MINER_WORKER
     global MINERS_PRIVATE_ADDRESS
     global MINERS_PUBLIC_ADDRESS
@@ -94,7 +97,7 @@ def start_mining():
         code = 400
     else:
         MINER_WORKER = return_fresh_thread(
-            (blockchain, MINERS_PUBLIC_ADDRESS, MINERS_PRIVATE_ADDRESS))
+            (MINERS_PUBLIC_ADDRESS, MINERS_PRIVATE_ADDRESS))
         MINER_WORKER.start()
     return jsonify(response), code
 
@@ -147,6 +150,7 @@ def get_transactions():
 
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
+    global blockchain
     values = request.form
     response = {}
     # Check that the required fields are in the POST'ed data
@@ -178,6 +182,6 @@ if __name__ == '__main__':
     port = args.port
 
     try:
-        app.run(host='0.0.0.0', port=port, debug=True)
-    except KeyboardInterrupt:
+        app.run(host='0.0.0.0', port=port)
+    except:
         dump2file(blockchain)

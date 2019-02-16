@@ -24,6 +24,7 @@ import pickle
 
 
 def dump2file(obj, file='BC.dat'):
+    print(obj)
     with(open(file, 'wb')) as f:
         pickle.dump(obj, f)
 
@@ -34,6 +35,5 @@ def restor_from_file(file='BC.dat'):
         with(open(file, 'rb')) as f:
             rslt = pickle.load(f)
     except:
-        print("No such file")
-        pass
+        return None
     return rslt
