@@ -14,8 +14,7 @@ from time import time
 from threading import Lock
 import random
 
-# Picle currently cannot dump lock object
-
+import requests
 
 class Thread_lock():
     TLock = Lock()
@@ -46,6 +45,10 @@ class Blockchain:
             rslt += '\n'
             rslt += '-->'
         return rslt
+
+    def export_chain(self, to_list):
+        for block in self.chain[1:]:
+            to_list.append(block)
 
     def is_valid(self):
         i = 1
@@ -145,3 +148,15 @@ class Blockchain:
         self.submit_transaction(None, None, sign_transaction(
             miners_reward, miner_pri_address), miner_pub_address, self.MINING_REWARD)
         self.create_block(nonce, hash_block(last_block))
+
+    # working on it
+    def pull_from_url(self, url):
+        if "http://" not in url:
+            url = "http://" + url
+        if "/chain" not in url:
+            url += "/chain"
+        msg = requests.get(url)
+
+
+
+

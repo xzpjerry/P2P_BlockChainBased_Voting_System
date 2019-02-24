@@ -64,25 +64,21 @@
           console.log(response);
           //Generate Transactions Table
           var transactions = [];
-          count = 1;
-
-          for (i = 1; i < response.length; i++) { 
-            for (j = 0; j < response["chain"][i]["transactions"].length; j++) {
-
-              //format date 
-              var options = {  year: "numeric", month: "short",  day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit"  };
-              var date = new Date(response["chain"][i]["timestamp"] * 1000);
-              var formattedDateTime = date.toLocaleTimeString("en-us", options);
-
-              transaction = [count,
-                            response["chain"][i]["transactions"][j]["recipient_address"],
-                            response["chain"][i]["transactions"][j]["sender_address"],
-                            response["chain"][i]["transactions"][j]["value"],
+          var options = {  year: "numeric", month: "short",  day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit"  };
+          for (i = 0; i < response["chain"].length; i++) { 
+            //format date 
+            var date = new Date(response["chain"][i]["timestamp"] * 1000);
+            var formattedDateTime = date.toLocaleTimeString("en-us", options);
+            for (j = 0; j < response["chain"][i]["history"].length; j++) {
+              transaction = [
+                            response["chain"][i]["block_number"],
                             formattedDateTime,
-                            response["chain"][i]["block_number"]];
+                            response["chain"][i]["history"][j]["token"],
+                            response["chain"][i]["history"][j]["voteTo"],
+                            response["chain"][i]["history"][j]["voter_address"],
+                            response["chain"][i]["history"][j]["miners_address"]
+                            ];
               transactions.push(transaction);
-
-              count += 1;
             };
           };
 
@@ -90,13 +86,14 @@
             $('#transactions_table').dataTable( {
               data: transactions,
               columns: [{ title: "#" },
-                        { title: "Recipient Address"},
-                        { title: "Sender Address"},
-                        { title: "Value"},
                         { title: "Timestamp"},
-                        { title: "Block"}],
-              columnDefs: [ {targets: [1,2,3,4,5], render: $.fn.dataTable.render.ellipsis( 25 )}]
-            } );
+                        { title: "Token"},
+                        { title: "Vote to"},
+                        { title: "Voter Address"},
+                        { title: "Miner Address"}
+                        ],
+              // columnDefs: [ {targets: [1,2,3,4,5], render: $.fn.dataTable.render.ellipsis( 25 )}]
+            });
 
         },
         error: function(error){

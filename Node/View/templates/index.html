@@ -30,7 +30,7 @@
       <tr>
         <th>Voter's Address</th>
         <th>Miner's Address</th>
-        <th>Token to Miner</th>
+        <th>Reward</th>
         <th>Voter's Vote</th>
       </tr>
     </thead>
@@ -76,30 +76,40 @@
 
 <!-- Blockchain Transactions Table -->
 <div class="container">
-  <table id="transactions_table" class="table table-striped table-bordered fixed" cellspacing="0" width="100%">
+  <table id="transactions_table" class="table table-striped table-bordered" cellspacing="0" width="100%">
+  </table>
+  <!-- <table id="transactions_table" class="table table-striped table-bordered fixed" cellspacing="0" width="100%">
+    <col width="20px" />
+    <col width="40px" />
     <col width="40px" />
     <col width="40px" />
     <col width="20px" />
     <col width="20px" />
     <thead>
       <tr>
+        <th>Block#</th>
+        <th>Date</th>
         <th>Voter's Address</th>
         <th>Miner's Address</th>
-        <th>Token to Miner</th>
+        <th>Reward</th>
         <th>Voter's Vote</th>
       </tr>
     </thead>
-    {% for vote_dict in table_items_mined %}
-    <thead>
-      <tr>
-        <th >{{vote_dict.voter_address}}</th>
-        <th >{{vote_dict.miners_address}}</th>
-        <th >{{vote_dict.token}}</th>
-        <th >{{vote_dict.voteTo}}</th>
-      </tr>
-    </thead>
+    {% for block in table_items_mined %}
+      {% for vote_dict in block.history %}
+        <thead>
+          <tr>
+            <th >{{block.block_number}}</th>
+            <th >{{block.timestamp | ctime }}</th>
+            <th >{{vote_dict.voter_address}}</th>
+            <th >{{vote_dict.miners_address}}</th>
+            <th >{{vote_dict.token}}</th>
+            <th >{{vote_dict.voteTo}}</th>
+          </tr>
+        </thead>
+      {% endfor %}
     {% endfor %}
-  </table>
+  </table> -->
 </div>
 
 <!-- Alert Message for unsuccessful vote -->
@@ -166,12 +176,44 @@
     $("#refresh_blockchain").click(function () {
 
       $.ajax({
-        url: "/nodes/resolve",
-        type: "GET",
+        url: "/chain",
+        type: 'GET',
         success: function(response){
 
-          window.location.reload(true);
-          
+          console.log(response);
+          //Generate Transactions Table
+          var transactions = [];
+          var options = {  year: "numeric", month: "short",  day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit"  };
+          for (i = 0; i < response["chain"].length; i++) { 
+            //format date 
+            var date = new Date(response["chain"][i]["timestamp"] * 1000);
+            var formattedDateTime = date.toLocaleTimeString("en-us", options);
+            for (j = 0; j < response["chain"][i]["history"].length; j++) {
+              transaction = [
+                            response["chain"][i]["block_number"],
+                            formattedDateTime,
+                            response["chain"][i]["history"][j]["token"],
+                            response["chain"][i]["history"][j]["voteTo"],
+                            response["chain"][i]["history"][j]["voter_address"],
+                            response["chain"][i]["history"][j]["miners_address"]
+                            ];
+              transactions.push(transaction);
+            };
+          };
+
+          // Restrict a column to 10 characters, do split words
+            $('#transactions_table').dataTable( {
+              data: transactions,
+              columns: [{ title: "#" },
+                        { title: "Timestamp"},
+                        { title: "Token"},
+                        { title: "Vote to"},
+                        { title: "Voter Address"},
+                        { title: "Miner Address"}
+                        ],
+              // columnDefs: [ {targets: [1,2,3,4,5], render: $.fn.dataTable.render.ellipsis( 25 )}]
+            });
+
         },
         error: function(error){
           console.log(error);
@@ -179,10 +221,6 @@
       });
 
     });
-
-
-    
-
   })
 
 

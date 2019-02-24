@@ -6,6 +6,7 @@ sys.path.append("Node/Modal")
 sys.path.append("Node/View")
 sys.path.append("Node/Controller")
 
+from time import ctime
 from blockChain import Blockchain
 from vote import Vote
 from core_logic import gen_id
@@ -51,16 +52,13 @@ def return_fresh_thread(arguments):
     return threading.Thread(target=blockchain.mine, args=arguments)
 
 
-def chain2list(blockchain, to_a_list):
-    for block in blockchain.chain:
-        for vote_dict in block['history']:
-            to_a_list.append(vote_dict)
-
-
 # Instantiate the Node
 app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
 CORS(app)
 
+@app.template_filter('ctime')
+def timectime(s):
+    return ctime(s) # datetime.datetime.fromtimestamp(s)
 
 @app.route('/')
 def index():
@@ -73,7 +71,7 @@ def index():
         table_items_outstanding.append(vote_dict)
 
     table_items_mined = []
-    chain2list(blockchain, table_items_mined)
+    blockchain.export_chain(table_items_mined)
 
     isMining = MINER_WORKER and MINER_WORKER.isAlive()
     return render_template('./index.html', index_is="isMining", table_items_outstanding=table_items_outstanding, table_items_mined=table_items_mined, isMining=isMining)
@@ -131,10 +129,11 @@ def new_identity():
 
 
 @app.route('/chain', methods=['GET'])
-def get_chain_records():
+def get_chain():
+    global blockchain
     response = {}
     records = []
-    get_chain_records(records)
+    blockchain.export_chain(records)
     response["chain"] = records
     return jsonify(response), 200
 
