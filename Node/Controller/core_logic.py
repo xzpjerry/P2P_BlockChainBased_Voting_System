@@ -25,7 +25,7 @@ def gen_id():
     }
     return response
 
-def verify_transaction_signature(public_address, signature, transaction_dict):
+def verify_object_signature(public_address, signature, some_object):
     """
     Check that the provided signature corresponds to transaction
     signed by the public key (sender_address)
@@ -33,13 +33,10 @@ def verify_transaction_signature(public_address, signature, transaction_dict):
     try:
         public_key = RSA.importKey(hex2bin(public_address))
         verifier = PKCS1_v1_5.new(public_key)
-        h = SHA.new(str(transaction_dict).encode('utf8'))
+        h = SHA.new(str(some_object).encode('utf8'))
         return verifier.verify(h, hex2bin(signature))
     except:
         return False
-
-def verify_and_append_transaction(inBC, withTranscation):
-    pass
 
 def POW_valid(last_block, latest_session, nonce, difficulty_bits, target):
     last_hash = hash_block(last_block)

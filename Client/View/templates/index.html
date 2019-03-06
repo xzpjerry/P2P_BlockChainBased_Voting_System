@@ -73,6 +73,13 @@
             </div>
 
             <div class="row">
+              <label class="col-sm-12">Candidate's Signature:</label>
+              <div class="col-sm-12">
+                <input type="text" name="can_sign" id="can_sign" rows="2" class="form-control" readonly>
+              </div>
+            </div>
+
+            <div class="row">
               <label class="col-sm-12">Vote Signature:</label>
               <div class="col-sm-12">
                 <input type="text" name="signature_con" id="signature_con" rows="2" class="form-control" readonly>
@@ -93,7 +100,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-        <button type="button" id="button_confirm_transaction" class="btn btn-success">Confirm Transaction</button>
+        <button type="button" id="button_confirm_vote" class="btn btn-success">Confirm Vote</button>
       </div>
 
     </div>
@@ -119,7 +126,7 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" id="button_confirm_transaction" class="btn btn-success" data-dismiss="modal">OK</button>
+        <button type="button" id="ok_modal" class="btn btn-warning" data-dismiss="modal">OK</button>
       </div>
 
     </div>
@@ -143,7 +150,7 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" id="button_confirm_transaction" class="btn btn-success" data-dismiss="modal">OK</button>
+        <button type="button" id="ok_modal2" class="btn btn-success" data-dismiss="modal">OK</button>
       </div>
 
     </div>
@@ -171,6 +178,7 @@
             document.getElementById("voter_address_con").value = response["vote"]["voter_address"];
             document.getElementById("vote2_con").value = response["vote"]["voteTo"];
             document.getElementById("signature_con").value = response["signature"];
+            document.getElementById("can_sign").value = response["candidate_sign"]
 
             $("#confirmModal").modal('show');
             
@@ -186,7 +194,7 @@
 
 
   $(function () {
-      $("#button_confirm_transaction").click(function () {
+      $("#button_confirm_vote").click(function () {
         //console.log($('#confirmation_vote_form').serialize());
 
 

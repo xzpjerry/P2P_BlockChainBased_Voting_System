@@ -7,7 +7,7 @@ sys.path.append("Node/View")
 sys.path.append("Node/Controller")
 
 from vote import Vote
-from core_logic import verify_transaction_signature, POW_valid, sign_transaction
+from core_logic import verify_object_signature, POW_valid, sign_transaction
 from helper import hash_block
 from uuid import uuid4
 from time import time
@@ -16,12 +16,12 @@ import random
 
 import requests
 
+
 class Thread_lock():
     TLock = Lock()
 
 
 class Blockchain:
-    # Basic
     def __init__(self):
         self.MINING_REWARD = 1
         self.MINING_DIFF = 4
@@ -87,6 +87,7 @@ class Blockchain:
         Add a block of curr_session to the blockchain
         """
         block = {}
+        self.purify_curr_session()
         Thread_lock.TLock.acquire()
         try:
             block = {'block_number': len(self.chain) + 1,
@@ -114,10 +115,10 @@ class Blockchain:
                                 miner_address, token).to_dict()
         transaction_verification = False
         if voter_address:
-            transaction_verification = verify_transaction_signature(
+            transaction_verification = verify_object_signature(
                 voter_address, signature, transaction_dict)
         elif miner_address:
-            transaction_verification = verify_transaction_signature(
+            transaction_verification = verify_object_signature(
                 miner_address, signature, transaction_dict)
         if transaction_verification:
             Thread_lock.TLock.acquire()
@@ -131,13 +132,38 @@ class Blockchain:
         else:
             return -1
 
+    def purify_curr_session(self):
+        seem = set()
+        i = 0
+        while i < len(self.curr_session):
+            if self.curr_session[i]["voter_address"] in seem:
+                Thread_lock.TLock.acquire()
+                self.curr_session.pop(i)
+                Thread_lock.TLock.release()
+                i += 1
+                continue
+            if self.curr_session[i]["voter_address"]: seem.add(self.curr_session[i]["voter_address"])
+            for block in self.chain:
+                flag = False
+                for vote_dict in block['history']:
+                    if not vote_dict["voter_address"]: continue
+                    seem.add(vote_dict["voter_address"])
+                    if vote_dict["voter_address"] == self.curr_session[i]["voter_address"]:
+                        Thread_lock.TLock.acquire()
+                        self.curr_session.pop(i)
+                        Thread_lock.TLock.release()
+                        flag = True
+                        break
+                if flag:
+                    break
+            i += 1
+
     def mine(self, miner_pub_address, miner_pri_address):
         random.seed()
         nonce = 0
         last_block = None
         while True:
             # Need to update the block info from peers here
-
             nonce = random.randint(0, self.MAX_NONCE)
             last_block = self.chain[-1]
             target = '0' * self.MINING_DIFF
@@ -156,7 +182,3 @@ class Blockchain:
         if "/chain" not in url:
             url += "/chain"
         msg = requests.get(url)
-
-
-
-

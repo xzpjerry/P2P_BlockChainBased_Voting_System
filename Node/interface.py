@@ -9,7 +9,7 @@ sys.path.append("Node/Controller")
 from time import ctime
 from blockChain import Blockchain
 from vote import Vote
-from core_logic import gen_id
+from core_logic import gen_id, verify_object_signature
 from helper import restor_from_file
 
 import requests
@@ -38,6 +38,11 @@ import threading
 MINER_WORKER = None
 
 
+def get_candidate_public_key_from_some_secure_channel():
+    # This can be done by downloading from https servers
+    return '30819f300d06092a864886f70d010101050003818d0030818902818100abfac79b3656f20de2cda012482788f78a0b6e891c6b93c946c3b14617a6aa743b49a9fbbd426245b7ef8382f20c2a6f0d29ab92699961076fe38658f4e6a4bbbdededc053aa445f78a0aaf17559ee8fea17e2f19b812201c7b4a7f8029f2df8fb030561f25d8b7e9c829530633ea1cb68aed505574c34e74b2b6e20b88d20990203010001'
+
+
 def from_locoal_host(request):
     ip = None
     if request.headers.getlist("X-Forwarded-For"):
@@ -56,9 +61,11 @@ def return_fresh_thread(arguments):
 app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
 CORS(app)
 
+
 @app.template_filter('ctime')
 def timectime(s):
-    return ctime(s) # datetime.datetime.fromtimestamp(s)
+    return ctime(s)  # datetime.datetime.fromtimestamp(s)
+
 
 @app.route('/')
 def index():
@@ -153,9 +160,12 @@ def new_transaction():
     values = request.form
     response = {}
     # Check that the required fields are in the POST'ed data
-    required = ['voter_address_con', 'vote2_con', 'signature_con']
+    required = ['voter_address_con', 'vote2_con', 'signature_con', 'can_sign']
     if not all(k in values for k in required):
         response['error'] = 'Missing values'
+        return jsonify(response), 400
+    if not verify_object_signature(get_candidate_public_key_from_some_secure_channel(), values['can_sign'], values['vote2_con']):
+        response['error'] = "Invalid Candidate"
         return jsonify(response), 400
     # Create a new Transaction
     rslt = blockchain.submit_transaction(

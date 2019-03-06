@@ -85,6 +85,7 @@ def generate_vote():
             break
         else:
             vote2candidate = candidate
+            response["candidate_sign"] = sign
     if not vote2candidate:
         response["error"] = "No such candidate or your candidate list is corrupted."
         code = 500
