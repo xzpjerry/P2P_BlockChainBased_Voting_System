@@ -4,4 +4,44 @@
    Use a production WSGI server instead.
  * Debug mode: off
  * Running on http://127.0.0.1:8080/ (Press CTRL+C to quit)
-127.0.0.1 - - [12/Mar/2019 13:48:34] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:07:21] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:07:24] "POST /generate/vote HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:08:15] "GET /static/vendor/bootstrap/js/bootstrap.bundle.min.js.map HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:08:15] "GET /static/vendor/bootstrap/css/bootstrap.min.css.map HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:09:46] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:09:46] "GET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:09:46] "GET /static/css/custom.css HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:09:46] "GET /static/vendor/jquery/jquery.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:09:46] "GET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:09:46] "GET /static/vendor/bootstrap/css/bootstrap.min.css.map HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:09:46] "GET /static/vendor/bootstrap/js/bootstrap.bundle.min.js.map HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:09:48] "POST /generate/vote HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:10:28] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:10:44] "POST /generate/vote HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:23:34] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:23:34] "GET /static/css/custom.css HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:23:34] "GET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:23:34] "GET /static/vendor/jquery/jquery.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:23:34] "GET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:23:35] "GET /static/vendor/bootstrap/css/bootstrap.min.css.map HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:23:35] "GET /static/vendor/bootstrap/js/bootstrap.bundle.min.js.map HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:23:36] "POST /generate/vote HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:27:33] "POST /generate/vote HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:29:50] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:29:50] "GET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:29:50] "GET /static/css/custom.css HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:29:50] "GET /static/vendor/jquery/jquery.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:29:50] "GET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:29:50] "GET /static/vendor/bootstrap/css/bootstrap.min.css.map HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:29:50] "GET /static/vendor/bootstrap/js/bootstrap.bundle.min.js.map HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:29:52] "POST /generate/vote HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:31:54] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:31:54] "GET /static/css/custom.css HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:31:54] "GET /static/vendor/jquery/jquery.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:31:54] "GET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:31:54] "GET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:31:54] "GET /static/vendor/bootstrap/css/bootstrap.min.css.map HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:31:54] "GET /static/vendor/bootstrap/js/bootstrap.bundle.min.js.map HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:31:55] "POST /generate/vote HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:35:02] "POST /generate/vote HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2019 15:35:25] "GET / HTTP/1.1" 200 -

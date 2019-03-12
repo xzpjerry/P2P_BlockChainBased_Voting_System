@@ -173,7 +173,7 @@ class Blockchain:
             i += 1
 
     def mine(self, miner_pub_address, miner_pri_address):
-        if (len(self.block) % 7) == 0:
+        if (len(self.chain) % 7) == 0:
             self.update_chain_from_nodes()
         random.seed()
         nonce = 0
