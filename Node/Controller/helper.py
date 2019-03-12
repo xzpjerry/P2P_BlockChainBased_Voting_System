@@ -8,7 +8,7 @@ def bin2hex(binStr):
 
 
 def hex2bin(hexStr):
-    return binascii.unhexlify(hexStr).decode('utf-8')
+    return binascii.unhexlify(hexStr)
 
 
 def hash_block(block_dict):
