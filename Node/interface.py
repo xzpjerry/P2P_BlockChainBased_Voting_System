@@ -70,8 +70,6 @@ def timectime(s):
 
 @app.route('/')
 def index():
-    if not from_locoal_host(request):
-        abort(404)
     global MINER_WORKER
     global blockchain
     table_items_outstanding = []
@@ -86,8 +84,6 @@ def index():
 
 @app.route('/mine', methods=['GET'])
 def start_mining():
-    if not from_locoal_host(request):
-        return "How do you get here?", 404
     global blockchain
     global MINER_WORKER
     global MINERS_PRIVATE_ADDRESS
@@ -110,23 +106,17 @@ def start_mining():
 @app.route('/configure')
 def configure():
     global blockchain
-    if not from_locoal_host(request):
-        abort(404)
     registered_nodes = list(blockchain.nodes)
     return render_template('./configure.html', index_is="isConfiguring", registered_nodes=registered_nodes)
 
 
 @app.route('/import_id')
 def new_id():
-    if not from_locoal_host(request):
-        abort(404)
     return render_template('./import_id.html', index_is="isImporting")
 
 
 @app.route('/identity/new', methods=['GET'])
 def new_identity():
-    if not from_locoal_host(request):
-        return "How do you get here", 404
     response = gen_id()
     global MINERS_PRIVATE_ADDRESS
     global MINERS_PUBLIC_ADDRESS
