@@ -20,9 +20,9 @@
   <form id="node_form">
     <div class="row">
       <label class="col-sm-2">Node URLs:</label>
-      <div class="col-sm-10">
-        <input type="text" name="nodes" id="nodes" rows="2" class="form-control">
-      </div>
+      <label >http://</label>
+      <input class="col-sm-6" type="text" name="nodes" id="nodes" rows="2" class="form-control">
+      <label >/chain</label>
     </div>
 
     <br>
@@ -46,9 +46,10 @@
         <h4 class="card-title">This node can retrieve Blockchain data from the following nodes:</h4>
       </div>
     </div>
-
     <div class="col-lg-12" id="list_nodes">
-
+      {% for node in registered_nodes %}
+      <p>{{ node }}</p>
+      {% endfor %}
     </div>
 
   </div>
@@ -67,7 +68,7 @@
         //console.log($('#confirmation_transaction_form').serialize());
 
         $.ajax({
-          url: "/nodes/register",
+          url: "/register_nodes",
           type: "POST",
           dataType : 'json',
           data: $('#node_form').serialize(),
@@ -84,36 +85,7 @@
         });
 
       });
-
-
-    $.ajax({
-      url: "/nodes/get",
-      type: 'GET',
-      success: function(response){
-
-        console.log(response['nodes']);
-        var node = "";
-        
-        for (i = 0; i < response['nodes'].length; i++) { 
-          //node = "<li>" + response['nodes'][i] + "</li>";
-          node = "<li> <a href=http://" + response['nodes'][i] + ">" + response['nodes'][i] +"</a></li>";
-          document.getElementById("list_nodes").innerHTML += node;
-
-        };
-      
-      },
-      error: function(error){
-        console.log(error);
-      }
-    });
-
-
   })
-
-
-
-
-
 </script>
 {% endblock %}
 

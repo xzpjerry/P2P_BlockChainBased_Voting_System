@@ -5,6 +5,8 @@ sys.path.append("../Controller")
 sys.path.append("Node/Modal")
 sys.path.append("Node/View")
 sys.path.append("Node/Controller")
+from urllib.parse import urlparse
+import requests
 
 from vote import Vote
 from core_logic import verify_object_signature, POW_valid, sign_transaction
@@ -22,16 +24,21 @@ class Thread_lock():
 
 
 class Blockchain:
-    def __init__(self):
-        self.MINING_REWARD = 1
-        self.MINING_DIFF = 4
-        self.MAX_NONCE = 2**32
-
-        self.curr_session = []
-        self.chain = []
+    def __init__(self, from_serialization=None):
         self.nodes = set()
         self.node_id = uuid4().hex
-        self.create_block(0, '00')
+        self.curr_session = []
+        if not from_serialization:
+            self.MINING_REWARD = 1
+            self.MINING_DIFF = 4
+            self.MAX_NONCE = 2**32
+            self.chain = []
+            self.create_block(0, "Hello World")
+        else:
+            self.MINING_REWARD = from_serialization["MINING_REWARD"]
+            self.MINING_DIFF = from_serialization["MINING_DIFF"]
+            self.MAX_NONCE = from_serialization["MAX_NONCE"]
+            self.chain = from_serialization["chain"]
 
     def __str__(self):
         rslt = "Node's id:"
@@ -46,9 +53,14 @@ class Blockchain:
             rslt += '-->'
         return rslt
 
-    def export_chain(self, to_list):
-        for block in self.chain[1:]:
-            to_list.append(block)
+    def export_chain(self):
+        rslt = {
+            "MINING_REWARD": self.MINING_REWARD,
+            "MINING_DIFF": self.MINING_DIFF,
+            "MAX_NONCE": self.MAX_NONCE,
+            "chain": self.chain
+        }
+        return rslt
 
     def is_valid(self):
         i = 1
@@ -90,7 +102,7 @@ class Blockchain:
         self.purify_curr_session()
         Thread_lock.TLock.acquire()
         try:
-            block = {'block_number': len(self.chain) + 1,
+            block = {'block_number': len(self.chain),
                      'timestamp': time(),
                      # caveat: array in a dict is a pointer like thing
                      'history': self.curr_session.copy(),
@@ -142,11 +154,13 @@ class Blockchain:
                 Thread_lock.TLock.release()
                 i += 1
                 continue
-            if self.curr_session[i]["voter_address"]: seem.add(self.curr_session[i]["voter_address"])
+            if self.curr_session[i]["voter_address"]:
+                seem.add(self.curr_session[i]["voter_address"])
             for block in self.chain:
                 flag = False
                 for vote_dict in block['history']:
-                    if not vote_dict["voter_address"]: continue
+                    if not vote_dict["voter_address"]:
+                        continue
                     seem.add(vote_dict["voter_address"])
                     if vote_dict["voter_address"] == self.curr_session[i]["voter_address"]:
                         Thread_lock.TLock.acquire()
@@ -159,6 +173,8 @@ class Blockchain:
             i += 1
 
     def mine(self, miner_pub_address, miner_pri_address):
+        if (len(self.block) % 7) == 0:
+            self.update_chain_from_nodes()
         random.seed()
         nonce = 0
         last_block = None
@@ -175,10 +191,22 @@ class Blockchain:
             miners_reward, miner_pri_address), miner_pub_address, self.MINING_REWARD)
         self.create_block(nonce, hash_block(last_block))
 
-    # working on it
-    def pull_from_url(self, url):
-        if "http://" not in url:
-            url = "http://" + url
-        if "/chain" not in url:
-            url += "/chain"
-        msg = requests.get(url)
+    def connect_node(self, url):
+        if "http" in url or "//" in url:
+            return 1
+        url = "http://" + url + "/chain"
+        self.nodes.add(url)
+        return 0
+
+    def update_chain_from_nodes(self):
+        # If registered nodes have longer and validated chains
+        # update ours with theirs
+        max_len = len(self.chain)
+        for node in self.nodes:
+            response = requests.get(node)
+            if response.status_code == 200:
+                t_chain = Blockchain(response.json()['chain'])
+                if len(t_chain.chain) > max_len:
+                    if t_chain.is_valid():
+                        self.chain = t_chain.chain.copy()
+                        max_len = len(self.chain)

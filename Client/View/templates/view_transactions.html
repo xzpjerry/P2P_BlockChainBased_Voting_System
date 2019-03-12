@@ -82,11 +82,10 @@
                 } else {
                   counts[response["chain"][i]["history"][j]["voteTo"]] = 1
                 }
-              }
+              } else continue
               transaction = [
                             response["chain"][i]["block_number"],
                             formattedDateTime,
-                            response["chain"][i]["history"][j]["token"],
                             response["chain"][i]["history"][j]["voteTo"],
                             response["chain"][i]["history"][j]["voter_address"],
                             response["chain"][i]["history"][j]["miners_address"]
@@ -105,9 +104,10 @@
 
           $('#transactions_table').dataTable( {
             data: transactions,
+            stateSave: true,
+            "bDestroy": true,
             columns: [{ title: "#" },
                       { title: "Timestamp"},
-                      { title: "Token"},
                       { title: "Vote to"},
                       { title: "Voter Address"},
                       { title: "Miner Address"}

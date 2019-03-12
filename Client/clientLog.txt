@@ -1,0 +1,7 @@
+ * Serving Flask app "client" (lazy loading)
+ * Environment: production
+   WARNING: Do not use the development server in a production environment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on http://127.0.0.1:8080/ (Press CTRL+C to quit)
+127.0.0.1 - - [12/Mar/2019 13:48:34] "GET / HTTP/1.1" 200 -

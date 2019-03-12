@@ -11,19 +11,27 @@ env:
 	python3 -m venv  env
 	($(INVENV) pip install -r requirements.txt )
 
+##
+## candidates list
+##
 Client/res/candidates.txt: 
 	echo "You must have this file"
 
 candidates:	Client/res/candidates.txt
 
+##
+## 
+##
 install:	env candidates
 
-start:	env candidates
-	bash start.sh 
+##
+##
+##
+client_start:	env candidates
+	($(INVENV) bash start_client.sh )
 
-stop:	
-	bash stop.sh
-
+node_start: env candidates
+	($(INVENV) bash start_node.sh )
 
 # 'clean' and 'veryclean' are typically used before checking 
 # things into git.  'clean' should leave the project ready to 

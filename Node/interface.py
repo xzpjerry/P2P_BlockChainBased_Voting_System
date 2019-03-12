@@ -29,7 +29,8 @@ sta_dir = os.path.join(os.path.dirname(
 blockchain = restor_from_file()
 if not blockchain:
     blockchain = Blockchain()
-print("Is valid", blockchain.is_valid())
+blockchain.curr_session = []
+blockchain.update_chain_from_nodes()
 
 MINERS_PUBLIC_ADDRESS = restor_from_file('pub.der')
 MINERS_PRIVATE_ADDRESS = restor_from_file('pri.der')
@@ -77,8 +78,7 @@ def index():
     for vote_dict in blockchain.curr_session:
         table_items_outstanding.append(vote_dict)
 
-    table_items_mined = []
-    blockchain.export_chain(table_items_mined)
+    table_items_mined = blockchain.chain
 
     isMining = MINER_WORKER and MINER_WORKER.isAlive()
     return render_template('./index.html', index_is="isMining", table_items_outstanding=table_items_outstanding, table_items_mined=table_items_mined, isMining=isMining)
@@ -109,9 +109,11 @@ def start_mining():
 
 @app.route('/configure')
 def configure():
+    global blockchain
     if not from_locoal_host(request):
         abort(404)
-    return render_template('./configure.html', index_is="isConfiguring")
+    registered_nodes = list(blockchain.nodes)
+    return render_template('./configure.html', index_is="isConfiguring", registered_nodes=registered_nodes)
 
 
 @app.route('/import_id')
@@ -138,10 +140,7 @@ def new_identity():
 @app.route('/chain', methods=['GET'])
 def get_chain():
     global blockchain
-    response = {}
-    records = []
-    blockchain.export_chain(records)
-    response["chain"] = records
+    response = blockchain.export_chain()
     return jsonify(response), 200
 
 
@@ -153,6 +152,20 @@ def get_transactions():
     response = {'transactions': outstanding_rslt}
     return jsonify(response), 200
 
+@app.route('/register_nodes', methods=['POST'])
+def register_nodes():
+    global blockchain
+    values = request.form
+    required = ['nodes']
+    response = {}
+    if not all(k in values for k in required):
+        response['error'] = "Missing values"
+        return jsonify(response), 400
+    if blockchain.connect_node(values['nodes']) > 0:
+        response['error'] = "Invalid url"
+        return jsonify(response), 400
+    response['message'] = "The node is registered."
+    return jsonify(response), 200
 
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
