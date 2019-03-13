@@ -1,4 +1,6 @@
 from collections import OrderedDict
+
+
 class Vote:
 
     def __init__(self, sender_address, vote):
@@ -9,7 +11,9 @@ class Vote:
         return self.data[attr]
 
     def to_dict(self):
-        return OrderedDict({'voter_address': self.sender_address,
-                           'miners_address': None,
-                           'token': None,  # Reward for miners
-                           'voteTo': self.vote})
+        rslt = OrderedDict()
+        rslt['voter_address'] = self.sender_address,
+        rslt['miners_address'] = None,
+        rslt['token'] = None,
+        rslt['voteTo'] = self.vote
+        return rslt
