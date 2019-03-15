@@ -30,7 +30,7 @@ class Blockchain:
         self.curr_session = []
         if not from_serialization:
             self.MINING_REWARD = 1
-            self.MINING_DIFF = 4
+            self.MINING_DIFF = 6
             self.MAX_NONCE = 2**32
             self.chain = []
             self.create_block(0, "Hello World")
@@ -148,18 +148,20 @@ class Blockchain:
         seem = set()
         i = 0
         while i < len(self.curr_session):
+            if self.curr_session[i]["voter_address"] == None:
+                i += 1
+                continue
             if self.curr_session[i]["voter_address"] in seem:
                 Thread_lock.TLock.acquire()
                 self.curr_session.pop(i)
                 Thread_lock.TLock.release()
-                i += 1
                 continue
-            if self.curr_session[i]["voter_address"]:
-                seem.add(self.curr_session[i]["voter_address"])
+            seem.add(self.curr_session[i]["voter_address"])
+            flag = False
             for block in self.chain:
                 flag = False
                 for vote_dict in block['history']:
-                    if not vote_dict["voter_address"]:
+                    if vote_dict["voter_address"] == None:
                         continue
                     seem.add(vote_dict["voter_address"])
                     if vote_dict["voter_address"] == self.curr_session[i]["voter_address"]:
@@ -170,26 +172,29 @@ class Blockchain:
                         break
                 if flag:
                     break
+            if flag:
+                continue
             i += 1
 
     def mine(self, miner_pub_address, miner_pri_address):
-        if (len(self.chain) % 7) == 0:
-            self.update_chain_from_nodes()
-        random.seed()
-        nonce = 0
-        last_block = None
-        while True:
-            # Need to update the block info from peers here
-            nonce = random.randint(0, self.MAX_NONCE)
-            last_block = self.chain[-1]
-            target = '0' * self.MINING_DIFF
-            if POW_valid(last_block, self.curr_session, nonce, self.MINING_DIFF, target):
-                break
-        miners_reward = Vote(None, None, miner_pub_address,
-                             self.MINING_REWARD).to_dict()
-        self.submit_transaction(None, None, sign_transaction(
-            miners_reward, miner_pri_address), miner_pub_address, self.MINING_REWARD)
-        self.create_block(nonce, hash_block(last_block))
+        while(True):
+            if (len(self.chain) % 7) == 0:
+                self.update_chain_from_nodes()
+            random.seed()
+            nonce = 0
+            last_block = None
+            while True:
+                # Need to update the block info from peers here
+                nonce = random.randint(0, self.MAX_NONCE)
+                last_block = self.chain[-1]
+                target = '0' * self.MINING_DIFF
+                if POW_valid(last_block, self.curr_session, nonce, self.MINING_DIFF, target):
+                    break
+            miners_reward = Vote(None, None, miner_pub_address,
+                                 self.MINING_REWARD).to_dict()
+            self.submit_transaction(None, None, sign_transaction(
+                miners_reward, miner_pri_address), miner_pub_address, self.MINING_REWARD)
+            self.create_block(nonce, hash_block(last_block))
 
     def connect_node(self, url):
         if "http" in url or "//" in url:
@@ -205,7 +210,7 @@ class Blockchain:
         for node in self.nodes:
             response = requests.get(node)
             if response.status_code == 200:
-                t_chain = Blockchain(response.json()['chain'])
+                t_chain = Blockchain(response.json())
                 if len(t_chain.chain) > max_len:
                     if t_chain.is_valid():
                         self.chain = t_chain.chain.copy()

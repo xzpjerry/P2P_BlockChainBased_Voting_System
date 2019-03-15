@@ -72,9 +72,9 @@ def timectime(s):
 def index():
     global MINER_WORKER
     global blockchain
-    table_items_outstanding = []
-    for vote_dict in blockchain.curr_session:
-        table_items_outstanding.append(vote_dict)
+    table_items_outstanding = blockchain.curr_session
+    # for vote_dict in blockchain.curr_session:
+    #     table_items_outstanding.append(vote_dict)
 
     table_items_mined = blockchain.chain
 
@@ -120,7 +120,7 @@ def new_identity():
     response = gen_id()
     global MINERS_PRIVATE_ADDRESS
     global MINERS_PUBLIC_ADDRESS
-    MINERS_PRIVATE_ADDRESS = response.get("private_key")
+    MINERS_PRIVATE_ADDRESS = response.pop("private_key")
     MINERS_PUBLIC_ADDRESS = response.get("public_key")
     return jsonify(response), 200
 

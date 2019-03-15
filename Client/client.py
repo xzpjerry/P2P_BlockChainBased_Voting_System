@@ -19,7 +19,7 @@ sys.path.append("./Controller")
 from vote import Vote
 from candidates import Candidates
 from signer import hex2bin, sign_transaction, gen_id, verfiy_candidate_signature
-from helper import restor_from_file
+from helper import restor_from_file, dump2file
 
 import os
 tmpl_dir = os.path.join(os.path.dirname(
@@ -46,6 +46,9 @@ CANDIDATES_PUBLIC_KEY = get_candidate_public_key_from_some_secure_channel()
 CANDIDATES = get_candidate_list_from_some_secure_channel()
 
 app = Flask(__name__, static_folder=sta_dir, template_folder=tmpl_dir)
+miner_nodes_pool = restor_from_file("nodes_pool.dat")
+if not miner_nodes_pool:
+    miner_nodes_pool = []
 
 
 @app.route('/')
@@ -64,12 +67,40 @@ def view_transaction():
     return render_template('./view_transactions.html', index_is="isViewing")
 
 
+@app.route('/register_nodes')
+def register_ndoes_ui():
+    global miner_nodes_pool
+    return render_template('./register_nodes_ui.html', index_is="isRegistering", registered_nodes=miner_nodes_pool)
+
+
 @app.route('/identity/new', methods=['GET'])
 def new_identity():
     response = gen_id()
+    response.pop('private_key')
+    return jsonify(response), 200
+
+
+@app.route('/register/nodes', methods=['POST'])
+def register_nodes():
+    values = request.form
+    required = ['nodes']
+    response = {}
+    if not all(k in values for k in required):
+        response['error'] = "Missing values"
+        return jsonify(response), 400
+    url = values['nodes']
+    if "http" in url or "//" in url:
+        response['error'] = "Invalid url"
+        return jsonify(response), 400
+    url = "http://" + url + "/transactions/new"
+    global miner_nodes_pool
+    miner_nodes_pool.append(url)
+    response['message'] = "The node is registered."
     return jsonify(response), 200
 
 # Compute and return the vote signatue
+
+
 @app.route('/generate/vote', methods=['POST'])
 def generate_vote():
     response = {}
@@ -95,11 +126,12 @@ def generate_vote():
     else:
         newvote = Vote(
             sender_address, vote2candidate)
-
+        global miner_nodes_pool
         response['vote'] = newvote.to_dict()
         try:
             response['signature'] = sign_transaction(
                 newvote.to_dict(), sender_private_key)
+            response['nodes'] = miner_nodes_pool
         except:
             response["error"] = "The key pair does not work."
             code = 500
@@ -108,7 +140,8 @@ def generate_vote():
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
-
+    import atexit
+    atexit.register(dump2file, miner_nodes_pool, "nodes_pool.dat")
     parser = ArgumentParser()
     parser.add_argument('-p', '--port', default=8080,
                         type=int, help='port to listen on')
@@ -116,7 +149,16 @@ if __name__ == '__main__':
     port = args.port
 
     # Client can only be run in local network
-    app.run(host='127.0.0.1', port=port)
-
+    # try:
+    #     app.run(host='127.0.0.1', port=port)
+    # except:
+    #     print("Exception!")
+    #     dump2file(miner_nodes_pool, "nodes_pool.dat")
+    
     # Testing purpose
-    # app.run(host='0.0.0.0', port=port)
+    # Client can only be run in local network
+    try:
+        app.run(host='0.0.0.0', port=port)
+    except:
+        print("Exception!")
+        dump2file(miner_nodes_pool, "nodes_pool.dat")

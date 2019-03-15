@@ -59,6 +59,17 @@
               <a class="nav-link" href="/view/transactions">View Vote Count</a>
             </li>
             {% endif %}
+
+            {% if "isRegistering" == index_is %}
+            <li class="nav-item active">
+              <a class="nav-link" href="/register_nodes">Register Miner Nodes</a>
+              <span class="sr-only">(current)</span>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="/register_nodes">Register Miner Nodes</a>
+            </li>
+            {% endif %}
           </ul>
         </div>
       </div>

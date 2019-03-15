@@ -1,11 +1,28 @@
+No such file
  * Serving Flask app "client" (lazy loading)
  * Environment: production
    WARNING: Do not use the development server in a production environment.
    Use a production WSGI server instead.
  * Debug mode: off
- * Running on http://127.0.0.1:8080/ (Press CTRL+C to quit)
-127.0.0.1 - - [13/Mar/2019 11:57:00] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [13/Mar/2019 11:57:02] "GET /import_id HTTP/1.1" 200 -
-127.0.0.1 - - [13/Mar/2019 11:57:04] "GET /identity/new HTTP/1.1" 200 -
-127.0.0.1 - - [13/Mar/2019 11:57:05] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [13/Mar/2019 11:57:16] "POST /generate/vote HTTP/1.1" 200 -
+ * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+172.17.0.1 - - [15/Mar/2019 03:01:58] "GET / HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 03:02:01] "GET /register_nodes HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 03:02:14] "POST /register/nodes HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 03:02:14] "GET /register_nodes HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 03:02:26] "POST /register/nodes HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 03:02:26] "GET /register_nodes HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 03:02:28] "GET / HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 03:02:29] "POST /generate/vote HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 16:02:48] "GET / HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 16:02:48] "GET /static/css/custom.css HTTP/1.1" 304 -
+172.17.0.1 - - [15/Mar/2019 16:02:48] "GET /static/vendor/jquery/jquery.min.js HTTP/1.1" 304 -
+172.17.0.1 - - [15/Mar/2019 16:02:48] "GET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1" 304 -
+172.17.0.1 - - [15/Mar/2019 16:02:48] "GET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1" 304 -
+172.17.0.1 - - [15/Mar/2019 16:02:52] "POST /generate/vote HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 16:02:59] "POST /generate/vote HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 18:41:42] "GET /register_nodes HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 18:41:42] "GET /static/vendor/DataTables/js/datatables.min.js HTTP/1.1" 304 -
+172.17.0.1 - - [15/Mar/2019 18:41:42] "GET /static/vendor/DataTables/js/ellipsis.js HTTP/1.1" 304 -
+172.17.0.1 - - [15/Mar/2019 18:41:52] "GET /view/transactions HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 18:48:25] "GET / HTTP/1.1" 200 -
+172.17.0.1 - - [15/Mar/2019 18:52:01] "GET /register_nodes HTTP/1.1" 200 -
