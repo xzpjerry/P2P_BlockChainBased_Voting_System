@@ -1,16 +1,18 @@
 '''
-title           : blockchainBased_voting_client.py
+title           : client.py
 description     : A blockchain voting client implemenation, with the following features
                   - Identity generation using Public/Private key encryption (based on RSA algorithm)
                   - Generation of vote with RSA encryption      
 author          : Jerry Xie
 date_created    : 20190118
-date_modified   : 20190118
+date_modified   : 20190319
 version         : 0.1
-usage           : python blockchain_client.py
+usage           : python3 client.py
 python_version  : 3.6.5
 Comments        : 
-References      : Will fill out this part when the work is done
+References      : This project is inspired by 
+                    https://hackernoon.com/learn-blockchains-by-building-one-117428612f46 and
+                        https://github.com/dvf/blockchain
 '''
 import sys
 sys.path.append("./Modal")

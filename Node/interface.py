@@ -1,3 +1,19 @@
+'''
+title           : interface.py
+description     : A blockchain voting miner node implemenation, with the following features
+                  - Verification of vote (based on RSA algorithm)
+                  - Vote counting
+author          : Jerry Xie
+date_created    : 20190118
+date_modified   : 20190319
+version         : 0.1
+usage           : python3 interface.py
+python_version  : 3.6.5
+Comments        : 
+References      : This project is inspired by 
+                    https://hackernoon.com/learn-blockchains-by-building-one-117428612f46 and
+                        https://github.com/dvf/blockchain
+'''
 import sys
 sys.path.append("./Modal")
 sys.path.append("./View")
