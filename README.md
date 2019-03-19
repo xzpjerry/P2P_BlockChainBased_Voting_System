@@ -1,4 +1,7 @@
 # P2P_BlockChainBased_Voting_System
+## Demo
+- Client demo is at http://35.197.84.58:8080/
+- Miner demos address are in the Client demo's "register miner nodes" page.
 
 ## Docker image usage:
 ### Build from scratch:
@@ -15,7 +18,6 @@ docker run -it -v <Folder to be mounted>:/host -p 8080:8080 xzpjerry/prjtestt ba
 ```
 cd /project
 make veryclean
-git pull
-make start 
-# so far only the client is finished
+make node_start
+make client_start
 ```
